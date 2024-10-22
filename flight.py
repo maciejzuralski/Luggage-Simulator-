@@ -12,10 +12,12 @@ class Flight:
         self.luggage_number = random.randint(100, 350)
         self.luggage = []
 
-    def update(self):
+    def update(self, t):
         self.position = self.position.move_towards(self.destination_airport.getPosition(), 10)
-        if self.position.x == self.destination_airport.position.x and self.position.y == self.destination_airport.position.y:
+        if (self.position.x == self.destination_airport.position.x and
+                self.position.y == self.destination_airport.position.y):
             self.destination_airport.add_luggage_for_issuing(self.luggage)
+            self.destination_airport.flight_arrival(self, t)
             self.flights.remove(self)
 
     def render(self, screen):

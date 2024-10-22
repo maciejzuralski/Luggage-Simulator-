@@ -38,9 +38,9 @@ if __name__ == '__main__':
 
             # update
             for airport in airports:
-                airport.update(airports)
+                airport.update(airports, t)
             for flight in flights:
-                flight.update()
+                flight.update(t)
 
             screen.fill((255, 255, 255))  # Fill the screen with black
 

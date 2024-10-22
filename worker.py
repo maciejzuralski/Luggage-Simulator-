@@ -17,5 +17,5 @@ class Worker:
         self.name = generate_name(random.randint(5, 15))
         self.surname = generate_name(random.randint(10, 20))
 
-        # error rate, range 0.1% - 1%
-        self.error_rate = random.random() * 0.009 + 0.001
+        # error rate, range 0.1% - 0.4%
+        self.error_rate = random.random() * 0.003 + 0.001

@@ -30,8 +30,8 @@ class Airport:
         # bigger airports have bigger radius on map
         self.radius = int(self.rate_of_travelers / 10) + 1
 
-        # starting airport sorting room error rate, range 0.1% - 0.4%
-        self.sorting_error_rate = random.random() * 0.003 + 0.001
+        # starting airport sorting room error rate, range 0.1% - 0.2%
+        self.sorting_error_rate = random.random() * 0.001 + 0.001
 
         # generate workers
         self.workers = [Worker() for _ in range(5)]
@@ -53,28 +53,45 @@ class Airport:
         new_flight.luggage = self.luggage_waiting[:new_flight.luggage_number]
         self.luggage_waiting = self.luggage_waiting[new_flight.luggage_number:]
 
+        for luggage in new_flight.luggage:
+            luggage.arrival_airport = destination.ICAO
+
+            # chance that luggage will go missing
+            if (random.random() < self.sorting_error_rate +
+                    self.now_working.error_rate +
+                    luggage.sorted_dt_in_minutes / 80):
+                # self.missing_luggage(luggage)
+                new_flight.luggage.remove(luggage)
+
         self.flights.append(new_flight)
 
     def missing_luggage(self, luggage):
-        print("M " + str(luggage.id))
+        pass
 
-    def add_new_luggage(self):
-        new_luggage = [Luggage() for _ in range(random.randint(0, self.rate_of_travelers))]
-        for luggage in new_luggage:
-            # chance that luggage go missing
-            if random.random() < self.sorting_error_rate + self.now_working.error_rate:
-                # self.missing_luggage(luggage)
-                new_luggage.remove(luggage)
+    def issuing_to_long(self, luggage):
+        pass
+
+    def add_new_luggage(self, t):
+        new_luggage = [Luggage(t, self.ICAO) for _ in range(random.randint(0, self.rate_of_travelers))]
         return new_luggage
 
-    def update(self, airports):
-        self.luggage_waiting.extend(self.add_new_luggage())
+    def flight_arrival(self, flight, t):
+        issuing_t = random.random() * (len(flight.luggage) ** 2) / 2040
+        for luggage in flight.luggage:
+            luggage.arrival_t = t
+            luggage.issuing_t = issuing_t
+            if random.random() * 30 < issuing_t - 30:
+                self.issuing_to_long(luggage)
 
+        flight.luggage = None
+
+    def update(self, airports, t):
         # chance for a new flight departure
         while random.random() < len(self.luggage_waiting) / 500:
             self.create_new_flight(airports)
 
-        #
+        # generate new luggage
+        self.luggage_waiting.extend(self.add_new_luggage(t))
 
     def render(self, screen):
         pg.draw.circle(screen, (0, 0, 0), self.position, self.radius)
@@ -91,5 +108,6 @@ class Airport:
 
     def add_sorting_error_rate(self, error):
         self.sorting_error_rate += error
+
         if self.sorting_error_rate <= 0:
             self.sorting_error_rate -= error
