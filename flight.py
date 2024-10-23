@@ -5,7 +5,11 @@ import pygame as pg
 
 
 def generate_unique_code():
-    unique_id = ''.join(random.choice(string.ascii_uppercase) for _ in range(3)).join(random.choice(string.digits) for _ in range(4))
+    unique_id = ''
+    for _ in range(3):
+        unique_id += random.choice(string.ascii_uppercase)
+    for _ in range(4):
+        unique_id += random.choice(string.digits)
     return unique_id
 
 

@@ -9,7 +9,9 @@ from luggage import Luggage
 
 def generate_unique_ICAO(length=4):
     characters = string.ascii_uppercase + string.digits
-    unique_id = ''.join(random.choice(characters) for _ in range(length))
+    unique_id = ''
+    for _ in range(length):
+        unique_id += random.choice(characters)
     return unique_id
 
 
@@ -46,6 +48,32 @@ class Airport:
         # how many luggage in last 3 hours
         self.how_may_luggage = [50, 50, 50, 50, 50, 50]
 
+        self.workers_to_exel()
+        self.workers_to_txt()
+
+    def workers_to_exel(self):
+        buffer = ''
+        for worker in self.workers:
+            buffer += (str(worker.id) + ',' +
+                       worker.name + ',' +
+                       worker.surname + ',' +
+                       self.ICAO + ',' +
+                       'Obsługa klienta\n')
+
+        with open('worker_exel.txt', 'a') as file:
+            file.write(buffer)
+
+    def workers_to_txt(self):
+        buffer = ''
+        for worker in self.workers:
+            buffer += (str(worker.id) + ',' +
+                       worker.name + ',' +
+                       worker.surname + ',' +
+                       self.ICAO + '\n')
+
+        with open('worker.txt', 'a') as file:
+            file.write(buffer)
+
     def create_new_flight(self, airports, t):
         # choice destination
         destination = self
@@ -56,31 +84,36 @@ class Airport:
         new_flight.luggage = self.luggage_waiting[:new_flight.luggage_number]
         self.luggage_waiting = self.luggage_waiting[new_flight.luggage_number:]
 
-        buffer = ''
+        buffer_complain = ''
+        buffer_client = ''
         for luggage in new_flight.luggage:
             luggage.arrival_airport = destination.ICAO
             luggage.acceptance_worker_id = self.now_working.id
             luggage.flight = new_flight.name
 
             # chance that luggage will go missing
-            if (random.random() < self.sorting_error_rate +
+            if (random.random() * 100 < self.sorting_error_rate +
                     self.now_working.error_rate +
                     luggage.sorting_t / 80):
-                buffer += self.missing_luggage(luggage)
+                b1, b2 = self.missing_luggage(luggage)
+                buffer_complain += b1
+                buffer_client += b2
                 new_flight.luggage.remove(luggage)
 
         with open('complaint.txt', 'a') as file:
-            file.write(buffer)
+            file.write(buffer_complain)
+        with open('client.txt', 'a') as file:
+            file.write(buffer_client)
         self.flights.append(new_flight)
 
     def missing_luggage(self, luggage):
-        return str(uuid.uuid4()) + luggage.complain() + 'Zgubiony|opis\n'
+        return str(uuid.uuid4()) + luggage.complain() + 'Zgubiony|opis\n', luggage.client()
 
     def issuing_to_long(self, luggage):
-        return str(uuid.uuid4()) + luggage.complain() + 'Zbyt długi czas oczekiwania|opis\n'
+        return str(uuid.uuid4()) + luggage.complain() + 'Zbyt długi czas oczekiwania|opis\n', luggage.client()
 
     def damaged_luggage(self, luggage):
-        return str(uuid.uuid4()) + luggage.complain() + 'Uszkodzony|opis\n'
+        return str(uuid.uuid4()) + luggage.complain() + 'Uszkodzony|opis\n', luggage.client()
 
     def add_new_luggage(self, t):
         new_luggage = [Luggage(t, self.ICAO) for _ in range(random.randint(0, self.rate_of_travelers))]
@@ -89,6 +122,7 @@ class Airport:
     def flight_arrival(self, flight, t):
         buffer_luggage = ''
         buffer_complain = ''
+        buffer_client = ''
         self.how_may_luggage[0] += len(flight.luggage)
 
         # issuing_t = random.random() * (len(flight.luggage) ** 2) / 2040
@@ -101,16 +135,23 @@ class Airport:
             luggage.issuing_t = issuing_t
 
             if random.random() * 30000 < damaging_r:
-                buffer_complain += self.damaged_luggage(luggage)
+                b1, b2 = self.damaged_luggage(luggage)
+                buffer_complain += b1
+                buffer_client += b2
             if random.random() * 400 < issuing_t - 20:
-                buffer_complain += self.issuing_to_long(luggage)
+                b1, b2 = self.issuing_to_long(luggage)
+                buffer_complain += b1
+                buffer_client += b2
 
             buffer_luggage += luggage.luggage(True)
+            buffer_client += luggage.client()
 
         with open('luggage.txt', 'a') as file:
             file.write(buffer_luggage)
         with open('complaint.txt', 'a') as file:
             file.write(buffer_complain)
+        with open('client.txt', 'a') as file:
+            file.write(buffer_client)
 
     def update(self, airports, t):
         # new 30 min

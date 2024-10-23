@@ -7,8 +7,9 @@ from datetime import datetime, timedelta
 
 def generate_name(length=10):
     # first letter uppercase, rest lowercase
-    word = ''.join(random.choice(string.ascii_uppercase))
-    word.join(random.choice(string.ascii_lowercase) for _ in range(length - 1))
+    word = random.choice(string.ascii_uppercase)
+    for _ in range(length - 1):
+        word += random.choice(string.ascii_lowercase)
     return word
 
 
@@ -49,7 +50,7 @@ class Luggage:
                 str(self.acceptance_t + timedelta(minutes=self.sorting_t)) + '|' +
                 str(self.arrival_t) + '|' +
                 str(self.arrival_t + timedelta(minutes=self.issuing_t)) + '|' +
-                str(reclaimed) + '|' + '\n')
+                str(reclaimed) + '\n')
 
     def arrive(self, t):
         self.arrival_t = t
@@ -65,4 +66,5 @@ class Luggage:
                     str(self.id) + '|' +
                     str(None) + '|')
 
-
+    def client(self):
+        return str(self.client_id) + '|' + self.client_name + '|' + self.client_surname + '|1|1\n'

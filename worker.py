@@ -6,8 +6,9 @@ import uuid
 
 def generate_name(length=10):
     # first letter uppercase, rest lowercase
-    word = ''.join(random.choice(string.ascii_uppercase))
-    word.join(random.choice(string.ascii_lowercase) for _ in range(length - 1))
+    word = random.choice(string.ascii_uppercase)
+    for _ in range(length - 1):
+        word += random.choice(string.ascii_lowercase)
     return word
 
 
