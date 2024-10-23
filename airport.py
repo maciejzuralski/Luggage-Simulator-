@@ -69,7 +69,7 @@ class Airport:
                 buffer += self.missing_luggage(luggage)
                 new_flight.luggage.remove(luggage)
 
-        with open('luggage.txt', 'a') as file:
+        with open('complaint.txt', 'a') as file:
             file.write(buffer)
         self.flights.append(new_flight)
 
@@ -92,7 +92,7 @@ class Airport:
         self.how_may_luggage[0] += len(flight.luggage)
 
         # issuing_t = random.random() * (len(flight.luggage) ** 2) / 2040
-        issuing_t = random.random() * sum(self.how_may_luggage) / 70
+        issuing_t = random.random() * sum(self.how_may_luggage) / 10
         damaging_r = random.random() * len(flight.luggage)
 
         for luggage in flight.luggage:
@@ -102,7 +102,7 @@ class Airport:
 
             if random.random() * 30000 < damaging_r:
                 buffer_complain += self.damaged_luggage(luggage)
-            if random.random() * 100 < issuing_t - 30:
+            if random.random() * 400 < issuing_t - 20:
                 buffer_complain += self.issuing_to_long(luggage)
 
             buffer_luggage += luggage.luggage(True)

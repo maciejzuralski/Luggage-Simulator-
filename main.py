@@ -45,13 +45,13 @@ if __name__ == '__main__':
             screen.fill((255, 255, 255))  # Fill the screen with black
 
             # Display
-            for airport in airports:
-                airport.render(screen)
-            for flight in flights:
-                flight.render(screen)
+            #for airport in airports:
+            #    airport.render(screen)
+            #for flight in flights:
+            #    flight.render(screen)
 
-            pg.display.update()  # Update the display
+            #pg.display.update()  # Update the display
             t += timedelta(minutes=30)  # adding 30 minutes to datetime
-            time.sleep(0.1)    # optional sleep
+            #time.sleep(0.1)    # optional sleep
 
     pg.quit()
